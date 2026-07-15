@@ -1,31 +1,56 @@
-# Dependencies
+# Environment
+.env
+.env.*
+!.env.example
+
+# Supabase
+supabase/.temp/
+supabase/.branches/
+supabase/.cache/
+supabase/config.local.toml
+
+# Prisma
+prisma/dev.db
+prisma/dev.db-journal
+
+# Node
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # Next.js
 .next/
 out/
+.turbo/
 
-# Environment
-.env
-.env.*
+# Build
+dist/
+build/
+coverage/
 
 # Logs
 *.log
 
-# Build
-dist/
-coverage/
-
-# OS
+# OS Files
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Other
+# Editors
+.vscode/settings.json
+.idea/
+*.swp
+
+# Temporary
+tmp/
+temp/
+.cache/
+
+# Generated
+next-env.d.ts
+/lib/generated/prisma
 .pnp
 .pnp.js
 .vercel
-*.tsbuildinfo
-next-env.d.ts
-
-# Skills (agent tools - not required for the app)
-/skills
