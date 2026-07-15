@@ -8,7 +8,6 @@ out/
 # Environment
 .env
 .env.*
-!.env.example
 
 # Logs
 *.log
@@ -27,4 +26,6 @@ Thumbs.db
 .vercel
 *.tsbuildinfo
 next-env.d.ts
-/lib/generated/prisma
+
+# Skills (agent tools - not required for the app)
+/skills
