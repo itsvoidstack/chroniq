@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model Profile {
+  id           String        @id @db.Uuid
+  display_name String?       @db.VarChar(100)
+  avatar_url   String?       @db.Text
+  bio          String?       @db.Text
+  created_at   DateTime?     @default(now()) @db.Timestamptz()
+  updated_at   DateTime?     @default(now()) @db.Timestamptz()
+  
+  userContents UserContent[]
+  lists        List[]
+
+  @@map("profiles")
+}
+
+model Content {
+  id         String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type       String        @db.VarChar(50)
+  anilist_id Int?
+  tmdb_id    Int?
+  title      String?       @db.VarChar(500)
+  poster_url String?       @db.Text
+  created_at DateTime?     @default(now()) @db.Timestamptz()
+  updated_at DateTime?     @default(now()) @db.Timestamptz()
+  
+  userContents UserContent[]
+  listItems    ListItem[]
+
+  @@unique([anilist_id, tmdb_id])
+  @@index([type])
+  @@index([anilist_id])
+  @@index([tmdb_id])
+  @@map("content")
+}
+
+model UserContent {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String    @db.Uuid
+  content_id      String    @db.Uuid
+  status          String    @db.VarChar(50)
+  progress        Int?      @default(0)
+  season_progress Int?      @default(0)
+  rating          Int?
+  notes           String?   @db.Text
+  start_date      DateTime? @db.Date
+  finish_date     DateTime? @db.Date
+  rewatch_count   Int?      @default(0)
+  favorite        Boolean?  @default(false)
+  created_at      DateTime? @default(now()) @db.Timestamptz()
+  updated_at      DateTime? @default(now()) @db.Timestamptz()
+
+  profile Profile @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  content Content @relation(fields: [content_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, content_id])
+  @@index([user_id])
+  @@index([content_id])
+  @@index([status])
+  @@map("user_content")
+}
+
+model List {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id     String     @db.Uuid
+  name        String     @db.VarChar(200)
+  description String?    @db.Text
+  is_public   Boolean?   @default(false)
+  is_default  Boolean?   @default(false)
+  created_at  DateTime?  @default(now()) @db.Timestamptz()
+  updated_at  DateTime?  @default(now()) @db.Timestamptz()
+
+  profile   Profile    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  listItems ListItem[]
+
+  @@index([user_id])
+  @@map("lists")
+}
+
+model ListItem {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  list_id    String    @db.Uuid
+  content_id String    @db.Uuid
+  position   Int
+  notes      String?   @db.Text
+  added_at   DateTime? @default(now()) @db.Timestamptz()
+
+  list    List    @relation(fields: [list_id], references: [id], onDelete: Cascade)
+  content Content @relation(fields: [content_id], references: [id], onDelete: Cascade)
+
+  @@unique([list_id, content_id])
+  @@index([list_id])
+  @@index([content_id])
+  @@map("list_items")
+}
