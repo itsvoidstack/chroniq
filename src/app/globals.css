@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design Tokens ─────────────────────────────────────────── */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 220 13% 11%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 220 13% 11%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 13% 11%;
+
+  --primary: 220 90% 56%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 220 13% 11%;
+
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
+
+  --accent: 220 14% 96%;
+  --accent-foreground: 220 13% 11%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 220 90% 56%;
+
+  --radius: 0.75rem;
+
+  --surface: 220 14% 98%;
+  --surface-elevated: 0 0% 100%;
+}
+
+.dark {
+  --background: 222 18% 9%;
+  --foreground: 210 20% 94%;
+
+  --card: 222 16% 12%;
+  --card-foreground: 210 20% 94%;
+
+  --popover: 222 16% 12%;
+  --popover-foreground: 210 20% 94%;
+
+  --primary: 220 90% 60%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 222 16% 16%;
+  --secondary-foreground: 210 20% 94%;
+
+  --muted: 222 16% 16%;
+  --muted-foreground: 215 14% 55%;
+
+  --accent: 222 16% 16%;
+  --accent-foreground: 210 20% 94%;
+
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 222 16% 18%;
+  --input: 222 16% 18%;
+  --ring: 220 90% 60%;
+
+  --surface: 222 18% 11%;
+  --surface-elevated: 222 16% 14%;
+}
+
+/* ── Base Styles ───────────────────────────────────────────── */
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}

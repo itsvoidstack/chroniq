@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── User Profile ────────────────────────────────────────────────────────────
+
+model Profile {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  username  String   @unique
+  bio       String?
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  libraryEntries LibraryEntry[]
+  historyEvents  HistoryEvent[]
+  trackedSites   TrackedSite[]
+  preferences    UserPreferences?
+
+  @@map("profiles")
+}
+
+model UserPreferences {
+  id                String    @id @default(uuid())
+  userId            String    @unique @map("user_id")
+  theme             String    @default("system")
+  defaultMediaType  String    @default("anime") @map("default_media_type")
+  autoProgress      Boolean   @default(true) @map("auto_progress")
+  notifications     Boolean   @default(true)
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+// ─── Library ─────────────────────────────────────────────────────────────────
+
+model LibraryEntry {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  mediaType   MediaType @map("media_type")
+  // External API IDs
+  anilistId   Int?      @map("anilist_id")
+  tmdbId      Int?      @map("tmdb_id")
+  jikanId     Int?      @map("jikan_id")
+  // Metadata cache (to avoid re-fetching)
+  title       String
+  coverImage  String?   @map("cover_image")
+  bannerImage String?   @map("banner_image")
+  totalCount  Int?      @map("total_count") // total episodes / chapters / etc.
+  // User data
+  status      LibraryStatus
+  progress    Int       @default(0)
+  score       Float?
+  startDate   DateTime? @map("start_date")
+  finishDate  DateTime? @map("finish_date")
+  notes       String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  profile        Profile        @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  historyEvents  HistoryEvent[]
+
+  @@unique([userId, mediaType, anilistId])
+  @@unique([userId, mediaType, tmdbId])
+  @@index([userId, mediaType])
+  @@index([userId, status])
+  @@map("library_entries")
+}
+
+// ─── History ─────────────────────────────────────────────────────────────────
+
+model HistoryEvent {
+  id             String      @id @default(uuid())
+  userId         String      @map("user_id")
+  libraryEntryId String?     @map("library_entry_id")
+  mediaType      MediaType   @map("media_type")
+  title          String
+  coverImage     String?     @map("cover_image")
+  // Progress snapshot
+  episodeNumber  Int?        @map("episode_number")
+  chapterNumber  Int?        @map("chapter_number")
+  // Source: manual entry or browser extension
+  source         EventSource @default(MANUAL)
+  siteUrl        String?     @map("site_url")
+  siteName       String?     @map("site_name")
+  watchedAt      DateTime    @default(now()) @map("watched_at")
+  createdAt      DateTime    @default(now()) @map("created_at")
+
+  profile      Profile       @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  libraryEntry LibraryEntry? @relation(fields: [libraryEntryId], references: [id], onDelete: SetNull)
+
+  @@index([userId, watchedAt(sort: Desc)])
+  @@index([userId, mediaType])
+  @@map("history_events")
+}
+
+// ─── Tracked Sites ───────────────────────────────────────────────────────────
+
+model TrackedSite {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  domain    String   // e.g. "crunchyroll.com"
+  label     String?  // optional display label
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  profile Profile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@unique([userId, domain])
+  @@map("tracked_sites")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum MediaType {
+  ANIME
+  MOVIE
+  TV
+  MANGA
+}
+
+enum LibraryStatus {
+  WATCHING
+  PLAN_TO_WATCH
+  COMPLETED
+  ON_HOLD
+  DROPPED
+  READING
+  PLAN_TO_READ
+}
+
+enum EventSource {
+  MANUAL
+  EXTENSION
+}
